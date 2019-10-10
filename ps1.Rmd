@@ -1,0 +1,123 @@
+---
+title: "problem set 1"
+author: "Chandler James"
+date: "October 9, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# library loadings
+library(tidyverse)
+library(haven)
+library(stargazer)
+```
+
+# Part 1
+
+```{r}
+# load the data 
+
+pres_polls_2016 <- read_dta("~/Box Sync/SOC/data/pres_polls_2016.dta")
+
+
+```
+
+### 1
+
+```{r}
+# generate a variable, dem_pollshare, measuring the two party share of support for the Democrats based on the variables adjpoll_clinton and adjpoll_trump
+
+pres_polls_2016 <- pres_polls_2016 %>%
+  mutate(dem_pollshare = adjpoll_clinton/(adjpoll_clinton + adjpoll_trump))
+```
+
+### 2
+```{r}
+# generate a variable, demvoteshare, measuring the Democratic Party’s share of thetwo-party vote based on the variables DemVotes and RepVotes.
+
+pres_polls_2016 <- pres_polls_2016 %>%
+  mutate(demvoteshare = DemVotes/(DemVotes + RepVotes))
+```
+
+### 3
+```{r}
+# generate a variable, pollsminusvotes, measuring the difference between the two vari-ables (dempollshare minus demvoteshare)
+
+pres_polls_2016 <- pres_polls_2016 %>%
+  mutate(pollsminusvotes = dem_pollshare-demvoteshare)
+```
+
+### 4
+```{r}
+# generate a variable, abspollsminusvotes, measuring the absolute value of the differ-ence between the two variables (dempollshare minus demvoteshare).
+
+pres_polls_2016 <- pres_polls_2016 %>%
+  mutate(abspollsminusvotes = abs(dem_pollshare - demvoteshare))
+```
+
+
+# Part 2
+
+### 1
+```{r}
+# Make a scatter plot with dempollshare on the x-axis and demvoteshare on the y-axis.
+
+pres_polls_2016 %>%
+  ggplot(aes(dem_pollshare, demvoteshare)) +
+  geom_point() +
+  geom_smooth(method = "lm")
+```
+
+### 2
+The graph above shows considerable correspondence between the x-axis (dem_pollshare) and y-axis (dem_voteshare). That is to say that the independent variable predicts the dependent variable. The slope of the line is near 45 degrees indicating that x predicts y reasonably well.
+
+# Part 3
+
+```{r}
+summary(pres_polls_2016)
+```
+
+### 1
+around 30.3% of the polls are considered to be top quality.
+
+
+```{r}
+# filtering for the top quality polls
+top_pres_polls_2016 <- pres_polls_2016 %>%
+  filter(quality_a == 1)
+summary(top_pres_polls_2016)
+
+# filtering for the low quality polls
+
+low_pres_polls_2016 <- pres_polls_2016 %>%
+  filter(quality_a == 0)
+summary(low_pres_polls_2016)
+```
+### 2
+The mean of abs_poll_minus_votes for top quality polls is  0.0333.
+The mean of abs_poll_minus_votes for low quality polls is  0.0399.
+
+### 3 
+
+The results above suggest that the top quality polls are more accurate. That is because the poll is closer to the vote when the value of abs_poll_minus_votes is smaller.
+
+# Part 4: Sample Size
+
+```{r}
+mod1 <- lm(abspollsminusvotes ~ samplesize, data = pres_polls_2016)
+stargazer(mod1, type = "text")
+```
+
+The coefficient on the variable sample size is negative. This suggest that there is a negative relationship between sample size and distance between the poll and the vote. This is evidence to suggest that larger sample sizes does not necessarily improve poll accuracy. 
+
+
+
+
+
+
+
+
+
+
